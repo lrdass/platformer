@@ -12,6 +12,7 @@ canvas = pg.Surface((300, 200))
 jump = False
 moving_right = False
 moving_left = False
+air_timer = 5
 
 game_map = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -57,7 +58,6 @@ def move(rect, movement, tiles):
     }
     rect.x += movement[0]
     hit_list = collision_test(rect, tiles)
-
     for tile in hit_list:
         if movement[0] > 0:
             rect.right = tile.left
@@ -65,7 +65,6 @@ def move(rect, movement, tiles):
         elif movement[0] < 0:
             rect.left = tile.right
             collisions["left"] = True
-
     rect.y += movement[1]
     hit_list = collision_test(rect, tiles)
     for tile in hit_list:
@@ -115,6 +114,12 @@ while True:
 
     player_rect, collisions = move(player_rect, player_movement, tile_rects)
 
+    if collisions["bottom"]:
+        air_timer = 0
+        vertical_momentum = 0
+    else:
+        air_timer += 1
+
     for event in pg.event.get():
         if event.type == QUIT:
             pg.quit()
@@ -126,7 +131,8 @@ while True:
             elif event.key == K_RIGHT:
                 moving_right = True
             elif event.key == K_UP:
-                vertical_momentum = -5
+                if air_timer < 6:
+                    vertical_momentum = -5
         if event.type == KEYUP:
             if event.key == K_LEFT:
                 moving_left = False
